@@ -1,0 +1,13 @@
+{% block content %}
+    <h2>Login</h2>
+    <form method="post" action='/invoices/'>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <label for="email">Email</label>
+        <input id="email" name="email" type="text" class="form-control">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" class="form-control">
+        <button type="submit" class="btn btn-primary">Login</button>
+
+    </form>
+{% endblock %}
