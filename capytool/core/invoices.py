@@ -3,6 +3,7 @@ import urllib.parse
 from requests.auth import HTTPBasicAuth
 from bs4 import BeautifulSoup as bs
 from ..models import Invoice
+from datetime import datetime
 
 def scrape_invoice(email, password):
     with requests.Session() as s:
@@ -36,10 +37,13 @@ def scrape_invoice(email, password):
             for item in items:
                 invoice = {}
                 invoice['idi'] = (item.find(class_='ITEM-NUMBER').get_text()).strip()
-                invoice['created_at'] = (item.find(class_='ITEM-DATE').get_text()).strip()
+                date_str = (item.find(class_='ITEM-DATE').get_text()).strip()
+                invoice['created_at'] = datetime.strptime(date_str, "%d/%m/%y").date()
                 invoice['client_name'] = (item.find(class_='ITEM-CLIENT').get_text()).strip()
-                invoice['total_ttc'] = (item.find(class_='ITEM-TOT-TTC').get_text()).strip()
-                invoice['total_tva'] = (item.find(class_='ITEM-TOT-TVA').get_text()).strip()
+                total_ttc_str = (item.find(class_='ITEM-TOT-TTC').get_text()).strip()
+                invoice['total_ttc'] = float(total_ttc_str.replace(u'\xa0', u'').replace(',', '.').replace('€', ''))
+                total_tva_str = (item.find(class_='ITEM-TOT-TVA').get_text()).strip()
+                invoice['total_tva'] = float(total_tva_str.replace(u'\xa0', u'').replace(',', '.').replace('€', ''))
                 invoice['email'] = email
                 invoices.append(invoice)
             return {'success': True, 'message': 'Login succeeded', 'invoices': invoices}
