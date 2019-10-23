@@ -1,6 +1,6 @@
 {% for invoice in invoices %}
     <div class="invoice">
-        <p>{{ invoice }}</p>
+        <a href="/invoices/{{ invoice.idi }}">Invoice {{ invoice.idi }}</a>
     </div>
 {% endfor %}
 {{ message }}

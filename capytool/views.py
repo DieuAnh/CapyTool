@@ -20,3 +20,9 @@ def show_invoices(request):
         return render(request, 'capytool/invoices.html', stuff_for_frontend)
     else:
         return render(request, 'capytool/login.html')
+
+def show_detail(request, idi):
+    invoice = Invoice.objects.get(idi=idi)
+    print('invoice returned is ', invoice, type(invoice))
+    stuff_for_frontend = {'invoice': invoice}
+    return render(request, 'capytool/invoice_detail.html', stuff_for_frontend)

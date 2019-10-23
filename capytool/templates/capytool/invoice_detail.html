@@ -1,0 +1,7 @@
+<p>Id of invoice: {{ invoice.idi }}</p>
+<p>Created at: {{ invoice.created_at }}</p>
+<p>Client's name: {{ invoice.client_name }}</p>
+<p>Total ttc: {{ invoice.total_ttc }}</p>
+<p>Total tva: {{ invoice.total_tva }}</p>
+<p>Email: {{ invoice.email }}</p>
+<a href="invoices/{{ invoice.idi }}/pdf">Preview in PDF</a>
