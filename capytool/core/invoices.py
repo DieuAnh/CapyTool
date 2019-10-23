@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup as bs
 from ..models import Invoice
 from datetime import datetime
 
-def get_content(className):
+def get_content(item, className):
     return (item.find(class_=className).get_text()).strip()
 
 def get_float_from_string(string):
@@ -42,13 +42,13 @@ def scrape_invoice(email, password):
             items = soup.find_all(class_='item-bg')
             for item in items:
                 invoice = {}
-                invoice['idi'] = get_content('ITEM-NUMBER')
-                date_str = get_content('ITEM-DATE')
+                invoice['idi'] = get_content(item, 'ITEM-NUMBER')
+                date_str = get_content(item, 'ITEM-DATE')
                 invoice['created_at'] = datetime.strptime(date_str, "%d/%m/%y").date()
-                invoice['client_name'] = get_content('ITEM-CLIENT')
-                total_ttc_str = get_content('ITEM-TOT-TTC')
+                invoice['client_name'] = get_content(item, 'ITEM-CLIENT')
+                total_ttc_str = get_content(item, 'ITEM-TOT-TTC')
                 invoice['total_ttc'] = get_float_from_string(total_ttc_str)
-                total_tva_str = get_content('ITEM-TOT-TVA')
+                total_tva_str = get_content(item, 'ITEM-TOT-TVA')
                 invoice['total_tva'] = get_float_from_string(total_tva_str)
                 invoice['email'] = email
                 invoices.append(invoice)
