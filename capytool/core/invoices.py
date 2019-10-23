@@ -5,6 +5,12 @@ from bs4 import BeautifulSoup as bs
 from ..models import Invoice
 from datetime import datetime
 
+def get_content(className):
+    return (item.find(class_=className).get_text()).strip()
+
+def get_float_from_string(string):
+    return float(string.replace(u'\xa0', u'').replace(',', '.').replace('€', ''))
+
 def scrape_invoice(email, password):
     with requests.Session() as s:
         headers = {
@@ -27,23 +33,23 @@ def scrape_invoice(email, password):
             'email': email,
             'password': password,
         }
-        res_post = s.post('https://app.factomos.com//controllers/app-pro/login-ajax.php', headers=headers, data=data, allow_redirects=True)
-        status_code = res_post.status_code
+        resPost = s.post('https://app.factomos.com//controllers/app-pro/login-ajax.php', headers=headers, data=data, allow_redirects=True)
+        statusCode = resPost.status_code
         invoices = []
-        if status_code == requests.codes.ok:
+        if statusCode == requests.codes.ok:
             res = s.get('https://app.factomos.com/mes-factures?&subFilter=valid')
             soup = bs(res.text, 'html.parser')
             items = soup.find_all(class_='item-bg')
             for item in items:
                 invoice = {}
-                invoice['idi'] = (item.find(class_='ITEM-NUMBER').get_text()).strip()
-                date_str = (item.find(class_='ITEM-DATE').get_text()).strip()
+                invoice['idi'] = get_content('ITEM-NUMBER')
+                date_str = get_content('ITEM-DATE')
                 invoice['created_at'] = datetime.strptime(date_str, "%d/%m/%y").date()
-                invoice['client_name'] = (item.find(class_='ITEM-CLIENT').get_text()).strip()
-                total_ttc_str = (item.find(class_='ITEM-TOT-TTC').get_text()).strip()
-                invoice['total_ttc'] = float(total_ttc_str.replace(u'\xa0', u'').replace(',', '.').replace('€', ''))
-                total_tva_str = (item.find(class_='ITEM-TOT-TVA').get_text()).strip()
-                invoice['total_tva'] = float(total_tva_str.replace(u'\xa0', u'').replace(',', '.').replace('€', ''))
+                invoice['client_name'] = get_content('ITEM-CLIENT')
+                total_ttc_str = get_content('ITEM-TOT-TTC')
+                invoice['total_ttc'] = get_float_from_string(total_ttc_str)
+                total_tva_str = get_content('ITEM-TOT-TVA')
+                invoice['total_tva'] = get_float_from_string(total_tva_str)
                 invoice['email'] = email
                 invoices.append(invoice)
             return {'success': True, 'message': 'Login succeeded', 'invoices': invoices}
