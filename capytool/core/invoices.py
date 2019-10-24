@@ -8,6 +8,7 @@ from io import BytesIO
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+import json
 
 def get_content(item, className):
     return (item.find(class_=className).get_text()).strip()
@@ -37,10 +38,12 @@ def scrape_invoice(email, password):
             'email': email,
             'password': password,
         }
-        resPost = s.post('https://app.factomos.com//controllers/app-pro/login-ajax.php', headers=headers, data=data, allow_redirects=True)
-        statusCode = resPost.status_code
+        resPost = s.post('https://app.factomos.com/controllers/app-pro/login-ajax.php', headers=headers, data=data, allow_redirects=True)
+        content = resPost.text
+        contentJson = json.loads(content)
+        code = contentJson['error']['code']
         invoices = []
-        if statusCode == requests.codes.ok:
+        if code == 0:
             res = s.get('https://app.factomos.com/mes-factures?&subFilter=valid')
             soup = bs(res.text, 'html.parser')
             items = soup.find_all(class_='item-bg')
@@ -57,7 +60,7 @@ def scrape_invoice(email, password):
                 invoice['email'] = email
                 invoices.append(invoice)
             return {'success': True, 'message': 'Login succeeded', 'invoices': invoices}
-        return {'success': status_code, 'message': 'Login failed', 'invoices': invoices}
+        return {'success': False, 'message': 'Login failed', 'invoices': invoices}
 
 def add_invoice_todb(invoice):
     if invoice: 
