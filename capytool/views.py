@@ -2,6 +2,7 @@ from django.shortcuts import render
 import requests
 from .models import Invoice
 from .core import invoices as _in
+from django.http import HttpResponse
 
 # Create your views here.
 def login(request):
@@ -23,6 +24,19 @@ def show_invoices(request):
 
 def show_detail(request, idi):
     invoice = Invoice.objects.get(idi=idi)
-    print('invoice returned is ', invoice, type(invoice))
     stuff_for_frontend = {'invoice': invoice}
     return render(request, 'capytool/invoice_detail.html', stuff_for_frontend)
+
+def display_pdf(request, idi):
+    invoice = Invoice.objects.get(idi=idi)
+    pdf = _in.render_to_pdf('capytool/invoice_pdf.html', invoice.__dict__)
+    if pdf:
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = "Invoice_%s.pdf" %(invoice.__dict__['idi'])
+        download = request.GET.get("download")
+        content = "inline; filename='%s'"%(filename)
+        if download:
+            content = "attachment; filename='%s'" %(filename)
+        response['Content-Disposition'] = content
+        return response
+    return HttpResponse("Not found")

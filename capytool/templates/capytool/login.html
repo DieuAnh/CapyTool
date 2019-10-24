@@ -2,7 +2,6 @@
     <h2>Login</h2>
     <form method="post" action='/invoices/'>
         {% csrf_token %}
-        {{ form.as_p }}
         <label for="email">Email</label>
         <input id="email" name="email" type="text" class="form-control">
         <label for="password">Password</label>
