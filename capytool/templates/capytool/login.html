@@ -7,8 +7,5 @@
         <label for="password">Password</label>
         <input id="password" name="password" type="password" class="form-control">
         <button type="submit" class="btn btn-primary">Login</button>
-        {% if message and message == 'Login failed' %}
-            <div style="margin-top: 10px;">{{ message }}</div>
-        {% endif %}
     </form>
 {% endblock %}

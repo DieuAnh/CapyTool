@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate
 import requests
 from .models import Invoice
 from .core import invoices as _in
@@ -19,21 +20,22 @@ def show_invoices(request):
         for invoice in invoices:
             if not Invoice.objects.filter(idi=invoice['idi']).exists():
                 new_inv = _in.add_invoice_todb(invoice)
+        request.session['is_authenticated'] = True
         return render(request, 'capytool/invoices.html', stuff_for_frontend)
     else:
         return render(request, 'capytool/login.html', stuff_for_frontend)
 
-@login_required
 def show_detail(request, idi):
-    invoice = Invoice.objects.get(idi=idi)
-    stuff_for_frontend = {'invoice': invoice}
-    return render(request, 'capytool/invoice_detail.html', stuff_for_frontend)
+    if 'is_authenticated' in request.session and request.session['is_authenticated']:
+        invoice = Invoice.objects.get(idi=idi)
+        stuff_for_frontend = {'invoice': invoice}
+        return render(request, 'capytool/invoice_detail.html', stuff_for_frontend)
+    return render(request, 'capytool/login.html')
 
-@login_required
 def display_pdf(request, idi):
     invoice = Invoice.objects.get(idi=idi)
     pdf = _in.render_to_pdf('capytool/invoice_pdf.html', invoice.__dict__)
-    if pdf:
+    if 'is_authenticated' in request.session and request.session['is_authenticated']:
         response = HttpResponse(pdf, content_type='application/pdf')
         filename = "Invoice_%s.pdf" %(invoice.__dict__['idi'])
         download = request.GET.get("download")
