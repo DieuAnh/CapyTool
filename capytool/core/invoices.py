@@ -10,8 +10,8 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 import json
 
-def get_content(item, className):
-    return (item.find(class_=className).get_text()).strip()
+def get_content(item, class_name):
+    return (item.find(class_=class_name).get_text()).strip()
 
 def get_float_from_string(string):
     return float(string.replace(u'\xa0', u'').replace(',', '.').replace('€', ''))
@@ -38,10 +38,10 @@ def scrape_invoice(email, password):
             'email': email,
             'password': password,
         }
-        resPost = s.post('https://app.factomos.com/controllers/app-pro/login-ajax.php', headers=headers, data=data, allow_redirects=True)
-        content = resPost.text
-        contentJson = json.loads(content)
-        code = contentJson['error']['code']
+        res_post = s.post('https://app.factomos.com/controllers/app-pro/login-ajax.php', headers=headers, data=data, allow_redirects=True)
+        content = res_post.text
+        content_json = json.loads(content)
+        code = content_json['error']['code']
         invoices = []
         if code == 0:
             res = s.get('https://app.factomos.com/mes-factures?&subFilter=valid')
