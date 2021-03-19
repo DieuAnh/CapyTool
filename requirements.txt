@@ -4,7 +4,7 @@ chardet==3.0.4
 Django==2.2.6
 html5lib==1.0.1
 idna==2.8
-Pillow==6.2.1
+Pillow==8.1.1
 PyPDF2==1.26.0
 pytz==2019.3
 reportlab==3.5.31
